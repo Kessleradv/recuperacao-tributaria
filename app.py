@@ -78,10 +78,23 @@ with st.form("formulario"):
     percentual_ipva = st.number_input("% tributos anteriores no IPVA", value=0.12)
     compras = st.number_input("Total de compras anuais (R$)", value=250000.0)
     percentual_insumos = st.number_input("% de insumos essenciais (0 a 1)", value=0.4)
+
+    # Permitir que o usuário faça upload de arquivos XML das empresas.
+    # Os arquivos enviados não são processados aqui, mas serão anexados ao objeto Empresa
+    # para posterior utilização ou armazenamento. É possível enviar múltiplos arquivos.
+    xml_files = st.file_uploader(
+        "Carregar arquivos XML da empresa", type=["xml"], accept_multiple_files=True
+    )
     submitted = st.form_submit_button("Aplicar Teses")
 
 if submitted:
     empresa = Empresa(nome, cnpj, setor)
+    # Anexar arquivos XML enviados à instância da empresa
+    if xml_files:
+        for f in xml_files:
+            # Guardar o conteúdo bruto do arquivo (bytes) ou apenas o nome
+            empresa.adicionar_documento("xml", f.getvalue())
+        st.success(f"{len(xml_files)} arquivo(s) XML carregado(s) com sucesso.")
     dados = {
         "receita_bruta": receita_bruta,
         "iss": iss,
